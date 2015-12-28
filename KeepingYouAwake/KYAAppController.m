@@ -14,9 +14,12 @@
 #import "NSUserDefaults+Keys.h"
 
 @interface KYAAppController () <NSUserNotificationCenterDelegate>
+@property (nonatomic, readwrite) KYASleepWakeTimer *sleepWakeTimer;
+
+// Battery Status
 @property (nonatomic) KYABatteryStatus *batteryStatus;
 @property (nonatomic, getter=isBatteryOverrideEnabled) BOOL batteryOverrideEnabled;
-@property (nonatomic, readwrite) KYASleepWakeTimer *sleepWakeTimer;
+@property (nonatomic) CGFloat currentlyUsedBatteryCapacityThreshold;
 
 // Status Item
 @property (strong, nonatomic) NSStatusItem *statusItem;
@@ -55,10 +58,18 @@
         
         if([self.batteryStatus isBatteryStatusAvailable])
         {
+            self.currentlyUsedBatteryCapacityThreshold = [NSUserDefaults standardUserDefaults].kya_batteryCapacityThreshold;
+            
             [notificationCenter addObserver:self
                                    selector:@selector(userDefaultsDidChange:)
                                        name:NSUserDefaultsDidChangeNotification
                                      object:nil];
+            
+            // Start receiving battery status changes
+            if([[NSUserDefaults standardUserDefaults] kya_isBatteryCapacityThresholdEnabled])
+            {
+                [self.batteryStatus registerForCapacityChangesIfNeeded];
+            }
         }
         
         [self configureEventHandler];
@@ -345,7 +356,7 @@
 - (void)checkAndEnableBatteryOverride
 {
     CGFloat currentCapacity = self.batteryStatus.currentCapacity;
-    CGFloat threshold = [NSUserDefaults standardUserDefaults].kya_batteryCapacityThreshold;
+    CGFloat threshold = self.currentlyUsedBatteryCapacityThreshold;
     
     self.batteryOverrideEnabled = (currentCapacity <= threshold);
 }
@@ -357,7 +368,7 @@
 
 - (void)batteryCapacityDidChange:(CGFloat)capacity
 {
-    CGFloat threshold = [NSUserDefaults standardUserDefaults].kya_batteryCapacityThreshold;
+    CGFloat threshold = self.currentlyUsedBatteryCapacityThreshold;
     if([self.sleepWakeTimer isScheduled] && (capacity <= threshold) && ![self isBatteryOverrideEnabled])
     {
         [self terminateTimer];
@@ -368,9 +379,20 @@
 
 - (void)userDefaultsDidChange:(NSNotification *)notification
 {
+    if(![self.batteryStatus isBatteryStatusAvailable])
+    {
+        return;
+    }
+    
     NSUserDefaults *defaults = (NSUserDefaults *)notification.object;
     
-    if([self.batteryStatus isBatteryStatusAvailable] && [defaults kya_isBatteryCapacityThresholdEnabled])
+    if(defaults.kya_batteryCapacityThreshold != self.currentlyUsedBatteryCapacityThreshold)
+    {
+        [self terminateTimer];
+        self.currentlyUsedBatteryCapacityThreshold = defaults.kya_batteryCapacityThreshold;
+    }
+    
+    if([defaults kya_isBatteryCapacityThresholdEnabled])
     {
         [self.batteryStatus registerForCapacityChangesIfNeeded];
     }
