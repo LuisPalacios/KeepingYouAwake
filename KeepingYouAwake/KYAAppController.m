@@ -10,10 +10,13 @@
 #import "KYASleepWakeTimer.h"
 #import "KYAEventHandler.h"
 #import "KYAMenuBarIcon.h"
+#import "KYABatteryStatus.h"
 #import "NSUserDefaults+Keys.h"
 
 @interface KYAAppController () <NSUserNotificationCenterDelegate>
-@property (strong, nonatomic, readwrite) KYASleepWakeTimer *sleepWakeTimer;
+@property (nonatomic) KYABatteryStatus *batteryStatus;
+@property (nonatomic, getter=isBatteryOverrideEnabled) BOOL batteryOverrideEnabled;
+@property (nonatomic, readwrite) KYASleepWakeTimer *sleepWakeTimer;
 
 // Status Item
 @property (strong, nonatomic) NSStatusItem *statusItem;
@@ -43,11 +46,20 @@
             [self activateTimer];
         }
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(applicationWillFinishLaunching:)
-                                                     name:NSApplicationWillFinishLaunchingNotification
-                                                   object:nil
+        NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+        [notificationCenter addObserver:self
+                               selector:@selector(applicationWillFinishLaunching:)
+                                   name:NSApplicationWillFinishLaunchingNotification
+                                 object:nil
          ];
+        
+        if([self.batteryStatus isBatteryStatusAvailable])
+        {
+            [notificationCenter addObserver:self
+                                   selector:@selector(userDefaultsDidChange:)
+                                       name:NSUserDefaultsDidChangeNotification
+                                     object:nil];
+        }
         
         [self configureEventHandler];
     }
@@ -56,7 +68,9 @@
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationDidFinishLaunchingNotification object:nil];
+    NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+    [notificationCenter removeObserver:self name:NSApplicationDidFinishLaunchingNotification object:nil];
+    [notificationCenter removeObserver:self name:NSUserDefaultsDidChangeNotification object:nil];
 }
 
 - (void)awakeFromNib
@@ -181,6 +195,9 @@
         return;
     }
     
+    // Check if the activation overrides the battery threshold
+    [self checkAndEnableBatteryOverride];
+    
     [self.sleepWakeTimer scheduleWithTimeInterval:timeInterval completion:^(BOOL cancelled) {
         // Post notifications
         if([[NSUserDefaults standardUserDefaults] kya_areNotificationsEnabled])
@@ -216,17 +233,19 @@
 
 - (void)terminateTimer
 {
-    [self.sleepWakeTimer invalidate];
+    [self disableBatteryOverride];
+    
+    if([self.sleepWakeTimer isScheduled])
+    {
+        [self.sleepWakeTimer invalidate];
+    }
 }
 
 #pragma mark - Menu Delegate
 
 - (IBAction)selectTimeInterval:(NSMenuItem *)sender
 {
-    if([self.sleepWakeTimer isScheduled])
-    {
-        [self.sleepWakeTimer invalidate];
-    }
+    [self terminateTimer];
 	
 	if (sender.alternate)
 	{
@@ -307,6 +326,60 @@
     return YES;
 }
 
+#pragma mark - Battery Status
+
+- (KYABatteryStatus *)batteryStatus
+{
+    if(_batteryStatus == nil)
+    {
+        _batteryStatus = [KYABatteryStatus new];
+        
+        __weak typeof(self) weakSelf = self;
+        _batteryStatus.capacityChangeHandler = ^(CGFloat capacity) {
+            [weakSelf batteryCapacityDidChange:capacity];
+        };
+    }
+    return _batteryStatus;
+}
+
+- (void)checkAndEnableBatteryOverride
+{
+    CGFloat currentCapacity = self.batteryStatus.currentCapacity;
+    CGFloat threshold = [NSUserDefaults standardUserDefaults].kya_batteryCapacityThreshold;
+    
+    self.batteryOverrideEnabled = (currentCapacity <= threshold);
+}
+
+- (void)disableBatteryOverride
+{
+    self.batteryOverrideEnabled = NO;
+}
+
+- (void)batteryCapacityDidChange:(CGFloat)capacity
+{
+    CGFloat threshold = [NSUserDefaults standardUserDefaults].kya_batteryCapacityThreshold;
+    if([self.sleepWakeTimer isScheduled] && (capacity <= threshold) && ![self isBatteryOverrideEnabled])
+    {
+        [self terminateTimer];
+    }
+}
+
+#pragma mark - User Defaults
+
+- (void)userDefaultsDidChange:(NSNotification *)notification
+{
+    NSUserDefaults *defaults = (NSUserDefaults *)notification.object;
+    
+    if([self.batteryStatus isBatteryStatusAvailable] && [defaults kya_isBatteryCapacityThresholdEnabled])
+    {
+        [self.batteryStatus registerForCapacityChangesIfNeeded];
+    }
+    else
+    {
+        [self.batteryStatus unregisterFromCapacityChanges];
+    }
+}
+
 #pragma mark - Apple Event Manager
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
@@ -317,7 +390,6 @@
                                                         andEventID:kAEGetURL
      ];
 }
-
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)reply
 {
@@ -335,10 +407,7 @@
         NSString *minutes = parameters[@"minutes"];
         NSString *hours = parameters[@"hours"];
         
-        if([self.sleepWakeTimer isScheduled])
-        {
-            [self.sleepWakeTimer invalidate];
-        }
+        [self terminateTimer];
         
         // Activate indefinitely if there are no parameters
         if(parameters.count == 0)

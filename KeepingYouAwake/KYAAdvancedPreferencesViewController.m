@@ -8,10 +8,13 @@
 
 #import "KYAAdvancedPreferencesViewController.h"
 #import "KYAPreference.h"
+#import "KYABatteryStatus.h"
 #import "NSUserDefaults+Keys.h"
 
 @interface KYAAdvancedPreferencesViewController () <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, nonnull) NSArray<KYAPreference *> *preferences;
+@property (nonatomic, readwrite) BOOL batteryStatusAvailable;
+@property (weak, nonatomic) IBOutlet NSUserDefaultsController *defaultsController;
 @end
 
 @implementation KYAAdvancedPreferencesViewController
@@ -19,6 +22,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    // Check the battery status
+    self.batteryStatusAvailable = [[KYABatteryStatus new] isBatteryStatusAvailable];
     
     [self configureAdvancedPreferences];
 }
@@ -36,16 +42,16 @@
 {
     NSMutableArray *preferences = [NSMutableArray new];
     
-    [preferences addObject:[[KYAPreference alloc] initWithTitle:NSLocalizedString(@"Disable menu bar icon highlight color", nil)
-                                                    defaultsKey:KYAUserDefaultsKeyMenuBarIconHighlightDisabled
-                            ]];
-    
     [preferences addObject:[[KYAPreference alloc] initWithTitle:NSLocalizedString(@"Enable experimental Notification Center integration", nil)
                                                     defaultsKey:KYAUserDefaultsKeyNotificationsEnabled
                             ]];
     
     [preferences addObject:[[KYAPreference alloc] initWithTitle:NSLocalizedString(@"Allow the display to sleep (when connected to AC power)", nil)
                                                     defaultsKey:KYAUserDefaultsKeyAllowDisplaySleep
+                            ]];
+    
+    [preferences addObject:[[KYAPreference alloc] initWithTitle:NSLocalizedString(@"Disable menu bar icon highlight color", nil)
+                                                    defaultsKey:KYAUserDefaultsKeyMenuBarIconHighlightDisabled
                             ]];
     
     self.preferences = [preferences copy];
@@ -61,6 +67,12 @@
     }
     [[NSUserDefaults standardUserDefaults] synchronize];
     [self.tableView reloadData];
+    
+    // Disable battery status integration
+    NSString *keyPath = [NSString stringWithFormat:@"values.%@", KYAUserDefaultsKeyBatteryCapacityThresholdEnabled];
+    [self.defaultsController setValue:@NO forKeyPath:keyPath];
+    keyPath = [NSString stringWithFormat:@"values.%@", KYAUserDefaultsKeyBatteryCapacityThreshold];
+    [self.defaultsController setValue:@10.0f forKeyPath:keyPath];
 }
 
 #pragma mark - Table View Delegate & Data Source

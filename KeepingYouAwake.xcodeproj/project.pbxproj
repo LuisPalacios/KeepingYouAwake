@@ -12,6 +12,7 @@
 		DA51E7DE1C2562A2008AA96C /* KYAActivationDuration.m in Sources */ = {isa = PBXBuildFile; fileRef = DA51E7DD1C2562A2008AA96C /* KYAActivationDuration.m */; };
 		DA5665A919FADED200B923FB /* NSApplication+LoginItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DA5665A819FADED200B923FB /* NSApplication+LoginItem.m */; };
 		DA5A50941ACC5C5400A444C8 /* KYAEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = DA5A50931ACC5C5400A444C8 /* KYAEvent.m */; };
+		DA5B5A231C28612100EE45C6 /* KYABatteryStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = DA5B5A221C28612100EE45C6 /* KYABatteryStatus.m */; };
 		DA637B3F19F14693004C8838 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DA637B3E19F14693004C8838 /* main.m */; };
 		DA637B4219F14693004C8838 /* KYAAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DA637B4119F14693004C8838 /* KYAAppDelegate.m */; };
 		DA637B4419F14693004C8838 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA637B4319F14693004C8838 /* Images.xcassets */; };
@@ -55,6 +56,8 @@
 		DA5665A819FADED200B923FB /* NSApplication+LoginItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSApplication+LoginItem.m"; sourceTree = "<group>"; };
 		DA5A50921ACC5C5400A444C8 /* KYAEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KYAEvent.h; sourceTree = "<group>"; };
 		DA5A50931ACC5C5400A444C8 /* KYAEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KYAEvent.m; sourceTree = "<group>"; };
+		DA5B5A211C28612100EE45C6 /* KYABatteryStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KYABatteryStatus.h; sourceTree = "<group>"; };
+		DA5B5A221C28612100EE45C6 /* KYABatteryStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KYABatteryStatus.m; sourceTree = "<group>"; };
 		DA637B3919F14693004C8838 /* KeepingYouAwake.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeepingYouAwake.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA637B3D19F14693004C8838 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA637B3E19F14693004C8838 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -161,6 +164,15 @@
 			name = About;
 			sourceTree = "<group>";
 		};
+		DA5B5A241C28612800EE45C6 /* Battery Status */ = {
+			isa = PBXGroup;
+			children = (
+				DA5B5A211C28612100EE45C6 /* KYABatteryStatus.h */,
+				DA5B5A221C28612100EE45C6 /* KYABatteryStatus.m */,
+			);
+			name = "Battery Status";
+			sourceTree = "<group>";
+		};
 		DA637B3019F14693004C8838 = {
 			isa = PBXGroup;
 			children = (
@@ -192,6 +204,7 @@
 				DAB268711A0D6BC600B58AD6 /* KYASleepWakeTimer.m */,
 				DA82B1111C2422F600FA46E0 /* Preferences */,
 				DA2691CF1B8230AB00B15779 /* MenuBar Icon */,
+				DA5B5A241C28612800EE45C6 /* Battery Status */,
 				DA4919C51ACFFF8D00D44F6A /* Event Handler */,
 				DA4919C61ACFFF9600D44F6A /* Extensions */,
 			);
@@ -324,6 +337,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA5665A919FADED200B923FB /* NSApplication+LoginItem.m in Sources */,
+				DA5B5A231C28612100EE45C6 /* KYABatteryStatus.m in Sources */,
 				DA46C1EE1BDCDFB00050357C /* NSUserDefaults+Keys.m in Sources */,
 				DA637B4219F14693004C8838 /* KYAAppDelegate.m in Sources */,
 				DA5A50941ACC5C5400A444C8 /* KYAEvent.m in Sources */,

@@ -9,6 +9,15 @@
 #import <Cocoa/Cocoa.h>
 
 @interface KYAAdvancedPreferencesViewController : NSViewController
+
+/**
+ *  Determines if the current Mac has a built-in battery.
+ */
+@property (nonatomic, readonly, getter=isBatteryStatusAvailable) BOOL batteryStatusAvailable;
+
+/**
+ *  A table view reference.
+ */
 @property (weak, nonatomic, nullable) IBOutlet NSTableView *tableView;
 
 /**
