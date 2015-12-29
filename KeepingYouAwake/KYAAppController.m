@@ -66,6 +66,8 @@
                                      object:nil];
             
             // Start receiving battery status changes
+            [self checkAndEnableBatteryOverride];
+            
             if([[NSUserDefaults standardUserDefaults] kya_isBatteryCapacityThresholdEnabled])
             {
                 [self.batteryStatus registerForCapacityChangesIfNeeded];
