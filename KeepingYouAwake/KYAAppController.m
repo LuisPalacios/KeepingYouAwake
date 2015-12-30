@@ -49,31 +49,13 @@
             [self activateTimer];
         }
         
-        NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
-        [notificationCenter addObserver:self
-                               selector:@selector(applicationWillFinishLaunching:)
-                                   name:NSApplicationWillFinishLaunchingNotification
-                                 object:nil
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationWillFinishLaunching:)
+                                                     name:NSApplicationWillFinishLaunchingNotification
+                                                   object:nil
          ];
         
-        if([self.batteryStatus isBatteryStatusAvailable])
-        {
-            self.currentlyUsedBatteryCapacityThreshold = [NSUserDefaults standardUserDefaults].kya_batteryCapacityThreshold;
-            
-            [notificationCenter addObserver:self
-                                   selector:@selector(userDefaultsDidChange:)
-                                       name:NSUserDefaultsDidChangeNotification
-                                     object:nil];
-            
-            // Start receiving battery status changes
-            [self checkAndEnableBatteryOverride];
-            
-            if([[NSUserDefaults standardUserDefaults] kya_isBatteryCapacityThresholdEnabled])
-            {
-                [self.batteryStatus registerForCapacityChangesIfNeeded];
-            }
-        }
-        
+        [self configureBatteryStatus];
         [self configureEventHandler];
     }
     return self;
@@ -353,6 +335,30 @@
         };
     }
     return _batteryStatus;
+}
+
+- (void)configureBatteryStatus
+{
+    if(![self.batteryStatus isBatteryStatusAvailable])
+    {
+        return;
+    }
+    
+    self.currentlyUsedBatteryCapacityThreshold = [NSUserDefaults standardUserDefaults].kya_batteryCapacityThreshold;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(userDefaultsDidChange:)
+                                                 name:NSUserDefaultsDidChangeNotification
+                                               object:nil
+     ];
+    
+    // Start receiving battery status changes
+    [self checkAndEnableBatteryOverride];
+    
+    if([[NSUserDefaults standardUserDefaults] kya_isBatteryCapacityThresholdEnabled])
+    {
+        [self.batteryStatus registerForCapacityChangesIfNeeded];
+    }
 }
 
 - (void)checkAndEnableBatteryOverride
