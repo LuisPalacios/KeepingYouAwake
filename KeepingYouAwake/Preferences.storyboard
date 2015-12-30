@@ -418,7 +418,7 @@
                 </viewController>
                 <customObject id="t0A-Qw-fEU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
                 <customObject id="xbZ-zI-2sg" customClass="SUUpdater"/>
-                <userDefaultsController id="oKX-YF-h6g"/>
+                <userDefaultsController representsSharedInstance="YES" id="oKX-YF-h6g"/>
             </objects>
             <point key="canvasLocation" x="1015" y="973"/>
         </scene>
