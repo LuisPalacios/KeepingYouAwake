@@ -27,4 +27,12 @@
  */
 - (IBAction)resetAdvancedPreferences:(nullable id)sender;
 
+/**
+ *  Is responsible to notifiy the app controller about any
+ *  battery status preference changes.
+ *
+ *  @param sender A sender.
+ */
+- (IBAction)batteryStatusPreferencesChanged:(nullable id)sender;
+
 @end

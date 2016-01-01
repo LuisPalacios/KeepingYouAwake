@@ -315,6 +315,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
+                                    <action selector="batteryStatusPreferencesChanged:" target="5bL-cI-YIY" id="YgF-pz-1Vq"/>
                                     <binding destination="5bL-cI-YIY" name="enabled" keyPath="batteryStatusAvailable" id="hgX-2y-SNh"/>
                                     <binding destination="oKX-YF-h6g" name="value" keyPath="values.info.marcel-dierkes.KeepingYouAwake.BatteryCapacityThresholdEnabled" id="ezw-Lw-lJ2"/>
                                 </connections>
@@ -334,6 +335,7 @@
                                         <rect key="frame" x="-2" y="14" width="394" height="25"/>
                                         <sliderCell key="cell" state="on" alignment="left" minValue="10" maxValue="90" doubleValue="50" tickMarkPosition="below" numberOfTickMarks="9" allowsTickMarkValuesOnly="YES" sliderType="linear" id="K3x-ip-8On"/>
                                         <connections>
+                                            <action selector="batteryStatusPreferencesChanged:" target="5bL-cI-YIY" id="goR-FN-Zhh"/>
                                             <binding destination="oKX-YF-h6g" name="value" keyPath="values.info.marcel-dierkes.KeepingYouAwake.BatteryCapacityThreshold" id="jND-2G-lF3"/>
                                             <binding destination="oKX-YF-h6g" name="enabled" keyPath="values.info.marcel-dierkes.KeepingYouAwake.BatteryCapacityThresholdEnabled" id="Aej-Zn-xL3"/>
                                         </connections>

@@ -10,6 +10,7 @@
 #import "KYAPreference.h"
 #import "KYABatteryStatus.h"
 #import "NSUserDefaults+Keys.h"
+#import "KYABatteryCapacityThreshold.h"
 
 @interface KYAAdvancedPreferencesViewController () <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, nonnull) NSArray<KYAPreference *> *preferences;
@@ -73,6 +74,13 @@
     [self.defaultsController setValue:@NO forKeyPath:keyPath];
     keyPath = [NSString stringWithFormat:@"values.%@", KYAUserDefaultsKeyBatteryCapacityThreshold];
     [self.defaultsController setValue:@10.0f forKeyPath:keyPath];
+}
+
+#pragma mark - Battery Status Preferences
+
+- (void)batteryStatusPreferencesChanged:(id)sender
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kKYABatteryCapacityThresholdDidChangeNotification object:nil];
 }
 
 #pragma mark - Table View Delegate & Data Source
