@@ -99,6 +99,7 @@ static void KYABatteryStatusChangeHandler(void *context);
     }
     
     CFRunLoopRemoveSource(CFRunLoopGetCurrent(), self.runLoopSource, kCFRunLoopDefaultMode);
+    self.runLoopSource = nil;
 }
 
 @end

@@ -190,8 +190,12 @@
         return;
     }
     
-    // Check if the activation overrides the battery threshold
+    // Check battery overrides and register for capacity changes.
     [self checkAndEnableBatteryOverride];
+    if([[NSUserDefaults standardUserDefaults] kya_isBatteryCapacityThresholdEnabled])
+    {
+        [self.batteryStatus registerForCapacityChangesIfNeeded];
+    }
     
     [self.sleepWakeTimer scheduleWithTimeInterval:timeInterval completion:^(BOOL cancelled) {
         // Post notifications
@@ -229,6 +233,7 @@
 - (void)terminateTimer
 {
     [self disableBatteryOverride];
+    [self.batteryStatus unregisterFromCapacityChanges];
     
     if([self.sleepWakeTimer isScheduled])
     {
@@ -351,8 +356,6 @@
      ];
     
     // Start receiving battery status changes
-    [self checkAndEnableBatteryOverride];
-    
     if([[NSUserDefaults standardUserDefaults] kya_isBatteryCapacityThresholdEnabled])
     {
         [self.batteryStatus registerForCapacityChangesIfNeeded];
@@ -391,16 +394,6 @@
     }
     
     [self terminateTimer];
-    
-    NSUserDefaults *defaults = (NSUserDefaults *)notification.object;
-    if([defaults kya_isBatteryCapacityThresholdEnabled])
-    {
-        [self.batteryStatus registerForCapacityChangesIfNeeded];
-    }
-    else
-    {
-        [self.batteryStatus unregisterFromCapacityChanges];
-    }
 }
 
 #pragma mark - Apple Event Manager
